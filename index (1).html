@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaClean Auto Spa - AI Assistant</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sky: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom watery glassmorphism and chat scrollbar */
+        .chat-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-track {
+            background: rgba(240, 249, 255, 0.4);
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb {
+            background: #7dd3fc;
+            border-radius: 9999px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #0284c7;
+        }
+        .water-glow {
+            box-shadow: 0 12px 40px -10px rgba(2, 132, 199, 0.15);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+        }
+        .bubble-wave {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0c4a6e 100%);
+        }
+        .quick-chip {
+            background: rgba(240, 249, 255, 0.8);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease-in-out;
+        }
+        .quick-chip:hover {
+            background: rgba(224, 242, 254, 1);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-sky-100 via-sky-50 to-cyan-100 font-sans text-sky-950 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Minimal Header Navigation -->
+    <header class="glass-panel border-b border-sky-200/60 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bubble-wave text-white rounded-xl flex items-center justify-center shadow-md shadow-sky-400/20">
+                    <i class="fa-solid fa-droplet text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base text-sky-950 tracking-tight leading-tight">AquaClean Auto Spa</h1>
+                    <p class="text-[11px] text-sky-600 font-medium">AI Support & Appointment Assistant</p>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="flex items-center space-x-2">
+                <a href="tel:+923001234567" class="hidden sm:flex items-center space-x-1.5 bg-sky-100 hover:bg-sky-200 text-sky-800 font-semibold px-3 py-1.5 rounded-lg transition-all text-xs border border-sky-200">
+                    <i class="fa-solid fa-phone text-sky-600"></i>
+                    <span>+92 300 1234567</span>
+                </a>
+                <button onclick="resetConversation()" title="Clear Conversation" class="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-lg border border-sky-200 transition-all text-xs flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-rotate-right text-sky-600"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Focus Container: Only Chat Box Visible -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 flex flex-col justify-center">
+        
+        <section class="glass-panel rounded-2xl shadow-xl border border-sky-200/80 flex flex-col h-[82vh] max-h-[850px] min-h-[580px] overflow-hidden water-glow relative">
+            
+            <!-- Chat Window Header Bar -->
+            <div class="bubble-wave px-4 py-3.5 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <div class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+                            <i class="fa-solid fa-robot text-sky-100 text-base"></i>
+                        </div>
+                        <span class="bottom-0 right-0 absolute w-2.5 h-2.5 bg-emerald-400 border-2 border-sky-900 rounded-full"></span>
+                    </div>
+                    <div>
+                        <h2 class="font-semibold text-sm sm:text-base tracking-wide">CleanBot Concierge</h2>
+                        <p class="text-[11px] text-sky-200">Roman Urdu & English • Online</p>
+                    </div>
+                </div>
+                <div class="text-[11px] bg-white/10 px-2.5 py-1 rounded-full text-sky-100 border border-white/15 hidden sm:block">
+                    <i class="fa-solid fa-sparkles text-sky-300 mr-1"></i> Quick AI Support
+                </div>
+            </div>
+
+            <!-- Messages Conversation Area -->
+            <div id="chatLog" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 chat-scrollbar bg-sky-50/30">
+                <!-- Messages populated dynamically -->
+            </div>
+
+            <!-- AI Typing Indicator -->
+            <div id="typingIndicator" class="hidden px-5 py-2 text-xs text-sky-700 flex items-center gap-2 bg-sky-50/80 border-t border-sky-100 shrink-0">
+                <i class="fa-solid fa-circle-notch animate-spin text-sky-600"></i>
+                <span>CleanBot is typing...</span>
+            </div>
+
+            <!-- Minimalist Clickable AI Prompt Chips -->
+            <div class="px-3 pt-2.5 pb-1 bg-white/90 border-t border-sky-100 shrink-0">
+                <div class="flex items-center gap-1.5 overflow-x-auto chat-scrollbar pb-1.5">
+                    <span class="text-[10px] uppercase font-bold text-sky-500 shrink-0 mr-1">Quick Options:</span>
+                    
+                    <button onclick="selectAiOption('Suggest Service', 'Meri car thori dirty hai, konsi service best rahegi?')" 
+                        class="quick-chip border border-sky-200 text-sky-900 text-xs px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sky-600 text-[11px]"></i>
+                        <span>Recommend</span>
+                    </button>
+
+                    <button onclick="selectAiOption('Book Wash', 'I want to book an appointment for a car wash.')" 
+                        class="quick-chip border border-sky-200 text-sky-900 text-xs px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-calendar-plus text-sky-600 text-[11px]"></i>
+                        <span>Book Wash</span>
+                    </button>
+
+                    <button onclick="selectAiOption('Price List', 'Aap ki tamam services ke exact rates kya hain?')" 
+                        class="quick-chip border border-sky-200 text-sky-900 text-xs px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-tags text-sky-600 text-[11px]"></i>
+                        <span>Price List</span>
+                    </button>
+
+                    <button onclick="selectAiOption('Location & Hours', 'Aap ki workshop ki location aur timing bata dein.')" 
+                        class="quick-chip border border-sky-200 text-sky-900 text-xs px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-map-pin text-sky-600 text-[11px]"></i>
+                        <span>Location & Hours</span>
+                    </button>
+
+                    <button onclick="selectAiOption('Talk to Support', 'Main human customer support agent se baat karna chahta hoon.')" 
+                        class="quick-chip border border-sky-200 text-sky-900 text-xs px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-headset text-sky-600 text-[11px]"></i>
+                        <span>Human Support</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Bar Input Form -->
+            <form id="chatForm" onsubmit="handleUserSubmit(event)" class="p-3 bg-white border-t border-sky-200/70 flex items-center gap-2 shrink-0">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="Type in Roman Urdu or English (e.g. Assalam-o-Alaikum, kaise hain?)..." 
+                    class="flex-1 bg-sky-50/60 focus:bg-white text-xs sm:text-sm border border-sky-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 rounded-xl px-4 py-3 outline-none transition-all placeholder-sky-400 text-sky-950"
+                    autocomplete="off"
+                />
+                <button 
+                    type="submit" 
+                    id="sendBtn"
+                    class="bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-md shadow-sky-500/20 flex items-center justify-center shrink-0 text-xs sm:text-sm gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span class="hidden sm:inline">Send</span>
+                </button>
+            </form>
+
+        </section>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="bg-white/60 border-t border-sky-200/50 py-2.5 backdrop-blur-xs shrink-0">
+        <div class="max-w-4xl mx-auto px-4 flex items-center justify-between text-xs text-sky-700">
+            <p class="text-[11px] text-sky-600">© 2026 AquaClean Auto Spa</p>
+</div>
+    </footer>
+    <script>
+        // Open-minded System Instruction enforcing human receptionist personality & Roman Urdu + English
+        const SYSTEM_INSTRUCTION = `
+You are an AI Customer Support and Booking Assistant for AquaClean Auto Spa.
+Your ONLY purpose is to help customers with car wash services, prices, packages, appointments, location, and customer support.
+
+PERSONALITY & NATURAL GREETINGS:
+- Talk like a polite, friendly, human receptionist at the counter.
+- Respond naturally and warmly to small talk, greetings, and casual questions (e.g., "kia haal hai", "kaise ho", "Assalam-o-Alaikum", "good morning").
+- CRITICAL: DO NOT dump a sales pitch or list of services when the customer is just greeting you or asking how you are!
+- Example for "kia haal hai?": "Alhamdulillah, main bilkul theek! Aap sunayein, aap kaise hain? Aaj aap ki car ke hawale se kis tarah help kar sakta hoon?"
+- Example for "Assalam o Alaikum": "Walaikum Assalam! Welcome to AquaClean. Kahiye, aaj aap ki car ke liye konsi service explore karna chahenge?"
+
+SERVICES & PRICING:
+- Exterior Wash: Rs 800 (Foam rinse & tire shine)
+- Interior Detailing: Rs 2,500 (Cabin vacuum, seat & dashboard polish)
+- Full Body Wash: Rs 1,800 (Exterior + underbody chassis + cabin vacuum)
+- Polish & Wax: Rs 3,500 (Paint protection & shine finish)
+- Engine Bay Cleaning: Rs 1,500 (Steam degrease & coat)
+- VIP Combo Package: Rs 6,500 (Complete all-in-one package)
+
+LOCATION & OPERATING HOURS:
+- Address: Main Boulevard, Gulberg III (Opposite Pace Mall), Lahore.
+- Operating Hours: Monday to Sunday, 09:00 AM to 09:00 PM (Friday break: 01:00 PM - 02:30 PM).
+
+LANGUAGE:
+- Use a natural mix of Roman Urdu and Simple English (Hinglish). Match customer tone.
+
+BOOKING FLOW:
+- Collect details naturally step-by-step: Customer Name, Contact Number, Car Model, Selected Service, Preferred Date & Time.
+- State that booking requests are logged and team will confirm availability.
+        `;
+        // State variables
+        let chatHistory = [];
+
+        // App Initialization
+        window.onload = function() {// Minimalist Welcome Message
+            const welcomeText = "Assalam-o-Alaikum! Welcome to <strong>AquaClean Auto Spa</strong>.<br><br>Main aap ki car wash services, packages, location aur appointment booking mein help kar sakta hoon. Kahiye, aaj main aap ki kya madad karoon?";
+            
+            appendBotMessage(welcomeText);
+        };
+
+        function getCurrentTimeFormatted() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function appendUserMessage(text) {
+            const chatLog = document.getElementById('chatLog');
+            const msgHtml = `
+                <div class="flex justify-end items-start space-x-2">
+                    <div class="bg-sky-600 text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-sm max-w-[85%] sm:max-w-[75%]">
+                        <p class="text-xs sm:text-sm leading-relaxed break-words">${escapeHtml(text)}</p>
+                        <span class="text-[9px] text-sky-200 mt-1 block text-right">${getCurrentTimeFormatted()}</span>
+                    </div>
+                </div>
+            `;
+            chatLog.insertAdjacentHTML('beforeend', msgHtml);
+            scrollToBottom();
+        }
+
+        function appendBotMessage(htmlContent) {
+            const chatLog = document.getElementById('chatLog');
+
+            const msgHtml = `
+                <div class="flex items-start space-x-2.5">
+                    <div class="w-8 h-8 bg-sky-100 text-sky-700 border border-sky-200 rounded-xl flex items-center justify-center shrink-0 text-xs shadow-xs">
+                        <i class="fa-solid fa-droplet text-sky-600"></i>
+                    </div>
+                    <div class="bg-white border border-sky-200/80 text-sky-950 rounded-2xl rounded-tl-none p-4 shadow-xs max-w-[88%] sm:max-w-[80%]">
+                        <div class="text-xs sm:text-sm leading-relaxed space-y-1.5">${htmlContent}</div>
+                        <span class="text-[9px] text-sky-400 mt-2 block">${getCurrentTimeFormatted()}</span>
+                    </div>
+                </div>
+            `;
+            chatLog.insertAdjacentHTML('beforeend', msgHtml);
+            scrollToBottom();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function formatMarkdownToHtml(markdown) {
+            return markdown
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function scrollToBottom() {
+            const chatLog = document.getElementById('chatLog');
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.remove('hidden');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.add('hidden');
+        }
+
+        function selectAiOption(optionTitle, promptText) {
+            document.getElementById('userInput').value = promptText;
+            handleUserSubmit(new Event('submit'));
+        }
+
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendUserMessage(text);
+            input.value = '';
+
+            chatHistory.push({ role: 'user', parts: [{ text: text }] });
+            showTyping();
+
+            try {
+                const responseText = await fetchGeminiResponse(text);
+                hideTyping();
+
+                const formattedHtml = formatMarkdownToHtml(responseText);
+                chatHistory.push({ role: 'model', parts: [{ text: responseText }] });
+
+                appendBotMessage(formattedHtml);
+
+            } catch (err) {
+                console.warn("API Call issue, switching to smart local response:", err);
+                hideTyping();
+
+                const fallbackText = getSmartFallbackResponse(text);
+                chatHistory.push({ role: 'model', parts: [{ text: fallbackText }] });
+
+                appendBotMessage(formatMarkdownToHtml(fallbackText));
+            }
+        }
+        async function fetchGeminiResponse(userPrompt, retries = 2, delay = 800) {
+            const apiUrl = "/api/chat";
+
+            const messages = [
+                { role: "system", content: SYSTEM_INSTRUCTION },
+                ...chatHistory.map(msg => ({
+                    role: msg.role === "model" ? "assistant" : "user",
+                    content: msg.parts?.map(p => p.text || "").join("") || ""
+                }))
+            ];
+
+            const payload = {
+                messages,
+                temperature: 0.5,
+                max_tokens: 450
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+
+                    if (!res.ok) {
+                        throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+                    }
+
+                    const candidateText = data?.choices?.[0]?.message?.content;
+                    if (typeof candidateText === "string" && candidateText.trim()) {
+                        return candidateText.trim();
+                    }
+
+                    throw new Error("Empty response");
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+                }
+            }
+
+            throw new Error("Unable to fetch response.");
+        }
+
+        // Open-minded local fallback logic
+        function getSmartFallbackResponse(text) {
+            const lower = text.toLowerCase();
+            
+            // Greetings & Casual Conversation
+            if (lower.includes('kia haal') || lower.includes('kya haal') || lower.includes('kaise ho') || lower.includes('kaise hain') || lower.includes('how are you')) {
+                return "Alhamdulillah, main bilkul theek thak! Aap sunayein, aap kaise hain?\n\nAaj aap ki car ke silsile mein kya khidmat kar sakta hoon?";
+            }
+            if (lower.startsWith('hi') || lower.startsWith('hello') || lower.includes('assalam') || lower.includes('slam') || lower.includes('salam')) {
+                return "Walaikum Assalam! AquaClean Auto Spa mein khush-amdeed. Kahiye, aaj aap ki car ke liye kya help kar sakta hoon?";
+            }
+            
+            // Service & Rates Queries
+            if (lower.includes('rate') || lower.includes('price') || lower.includes('cost') || lower.includes('package') || lower.includes('services')) {
+                return "Ji bilkul! Hamari services ki exact pricing ye hai:\n\n• **Exterior Wash:** Rs 800\n• **Interior Detailing:** Rs 2,500\n• **Full Body Wash:** Rs 1,800\n• **Polish & Wax:** Rs 3,500\n• **Engine Bay Cleaning:** Rs 1,500\n• **VIP Combo Package:** Rs 6,500\n\nAap apni car ki condition bata dein, main suitable service suggest kar deta hoon!";
+            }
+            
+            // Location Queries
+            if (lower.includes('location') || lower.includes('address') || lower.includes('where') || lower.includes('kahan') || lower.includes('timing') || lower.includes('hours')) {
+                return "Ji, hamari workshop **Main Boulevard, Gulberg III (Opposite Pace Mall), Lahore** mein hai.\n\nHum **Monday to Sunday, 09:00 AM se 09:00 PM** tak open hotey hain (Friday Break: 01:00 PM - 02:30 PM).";
+            }
+            
+            // Booking Queries
+            if (lower.includes('book') || lower.includes('appointment') || lower.includes('slot')) {
+                return "Sure! Main aap ki booking request note kar leta hoon. Sab se pehle aap apni **Car Model** aur **Preferred Service** bata dein?";
+            }
+            
+            // Complaints
+            if (lower.includes('complaint') || lower.includes('issue') || lower.includes('bad') || lower.includes('problem')) {
+                return "Sorry aap ko issue face karna pada. Main aap ki help karta hoon. Please apna booking name aur car detail share kar dein taake hum matter resolve kar sakein.";
+            }
+
+            // Human agent
+            if (lower.includes('human') || lower.includes('agent') || lower.includes('call') || lower.includes('baat')) {
+                return "Bilkul! Aap humare customer support helpline **+92 300 1234567** par call kar sakte hain ya yahan apna message chor dein, human team member contact kar lega.";
+            }
+
+            return "Ji bilkul! Main AquaClean Auto Spa Assistant hoon. Main aap ko service rates, packages, workshop location aur appointment booking mein guide kar sakta hoon. Aap befikar ho kar poochein!";
+        }
+
+        function resetConversation() {
+            chatHistory = [];
+            document.getElementById('chatLog').innerHTML = '';
+            appendBotMessage("Conversation reset. Welcome to <strong>AquaClean Auto Spa</strong>.<br><br>Kahiye, aaj main aap ki kya madad karoon?");
+        }
+    </script>
+</body>
+</html>
